@@ -111,7 +111,7 @@ public static class RenderCommand
                 executiveSummary = await aiService.EnrichSectionAsync("ExecutiveSummary", codeGraph, projectName);
 
                 var sb = new System.Text.StringBuilder();
-                var endpointsToProcess = codeGraph.Endpoints.Take(3).ToList();
+                var endpointsToProcess = codeGraph.Endpoints.Take(10).ToList();
                 foreach (var ep in endpointsToProcess)
                 {
                     var diagram = await aiService.GenerateSequenceDiagramAsync(ep, $"Project: {projectName}, Framework: {codeGraph.Framework}");

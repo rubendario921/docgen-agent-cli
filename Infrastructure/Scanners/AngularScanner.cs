@@ -25,13 +25,13 @@ public sealed class AngularScanner : ISourceCodeScanner
 
         //RegEx Basicas (Toleraciones a espacios y nuevas lineas)
         var rxNgModule = new Regex(@"@\s*NgModule\s*\(\s*\{[\s\S]*?\}\s*\)\s*export\s+class\s+(?<name>\w+)", RegexOptions.Compiled);
-        var rxComponent = new Regex(@"@\s*Component\s*\(\s*\{?<selector>[^'`]+['`][\s\S]*?\}\s*\)\s*export\s+class\s+(?<name>\w+)", RegexOptions.Compiled);
+        var rxComponent = new Regex(@"@\s*Component\s*\(\s*\{(?<selector>[^'`]+['`][\s\S]*?)\}\s*\)\s*export\s+class\s+(?<name>\w+)", RegexOptions.Compiled);
         var rxInjectable = new Regex(@"@\s*Injectable\s*\(\s*\{?[\s\S]*?\}?\s*\)\s*export\s+class\s+(?<name>\w+)", RegexOptions.Compiled);
         var rxRouterBlock = new Regex(@"RouterModule\.for(Root|Child)\s*\(\s*\[(?<routes>[\s\S]*?)\]\s*\)", RegexOptions.Compiled);
-        var rxRouteItem = new Regex(@"\{\s*path\s*:\s*?<path>[^'`]+['`][\s\S]*?(?:component\s*:\s*(?<component>\w+))?[\s\S]*?(?:loadChildren\s*:\s*(?<loadChildren>[^,}]+))?[\s\S]*?\}", RegexOptions.Compiled);
+        var rxRouteItem = new Regex(@"\{\s*path\s*:\s*(?<path>[^'`]+['`][\s\S]*?)(?:component\s*:\s*(?<component>\w+))?[\s\S]*?(?:loadChildren\s*:\s*(?<loadChildren>[^,}]+))?[\s\S]*?\}", RegexOptions.Compiled);
         //HttpClient llamadas(string literal)
-        var rxHttpCall = new Regex(@"(?<method>get|post|put|delete|patch)\s*<?<url>[^'`]+['`]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        var rxHttpCall2 = new Regex(@"(?<method>get|post|put|delete|patch)\s*\(\s*?<url>[^'`]+['`]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        var rxHttpCall = new Regex(@"(?<method>get|post|put|delete|patch)\s*(?<url>[^'`]+['`][\s\S]*?)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        var rxHttpCall2 = new Regex(@"(?<method>get|post|put|delete|patch)\s*\(\s*(?<url>[^'`]+['`][\s\S]*?)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         var rxClassName = new Regex(@"export\s+class\s+(?<name>\w+)", RegexOptions.Compiled);
         var rxMethodScope = new Regex(@"(?<name>\w+)\s*\([^)]*\)\s*{[\s\S]*?$", RegexOptions.Compiled);
 
