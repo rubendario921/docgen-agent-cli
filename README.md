@@ -1,118 +1,122 @@
-# DocGen-Agent
+# DocGen-Agent CLI 🤖📝
+
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
+[![Phase](https://img.shields.io/badge/Phase-3%20(AI%20Multi--Provider)-orange.svg)](https://github.com/rubendario921/docgen-agent-cli)
+[![Docker](https://img.shields.io/badge/Docker-Available-green.svg)](https://github.com/rubendario921/docgen-agent-cli)
+
+Agente inteligente CLI diseñado para la generación automatizada de documentación técnica de alta calidad. Utiliza **Arquitectura Hexagonal**, **IA (Azure OpenAI / GitHub Copilot)** y análisis estático para transformar código fuente en documentación estándar y profesional.
 
 ---
 
-## 1. Objetivo Principal
+## 🚀 Objetivo Principal
 
-Implementar un **pipeline manual y reutilizable** en Azure DevOps que, usando un **Agente CLI .NET publicado como dotnet tool** en un feed privado (Azure Artifacts), **genere documentación técnica en Markdown** para los repos, en un **formato estandarizado**, con publicación **directa a `/docs`** y cargar al **al Wiki** del proyecto.
+Implementar un **pipeline manual y reutilizable** que genere documentación técnica en Markdown para repositorios .NET y Node.js. El agente automatiza el análisis, renderizado y publicación (Wiki y `/docs`), asegurando consistencia y trazabilidad.
 
-### Estrategia
-Arquitectura Hexagonal, SOLID, Clean Code. Estándar de documentación unificado con plantillas y prompts.
+### ✨ Características Clave
 
-### Resultados esperados
-
-- **Análisis estático** del repositorio (controladores, endpoints, servicios, repos, interfaces, DTOs, módulos, etc).
-- **Detección de stack** (lenguaje/framework, dependencias principales).
-- **Estructura de documento Markdown** con secciones:
-  - Resumen Ejecutivo
-  - Arquitectura
-  - Stack Tecnológico
-  - Descripciones y Características  
-  - Diagramas de Secuencia (Mermaid)
-  - Historial de los últimos 10 cambios
-- **Publicación automática**:
-  - Fase 1: commit de `docs/techdoc.md` a la rama que ejecuta el pipeline.
-  - Fase 2: publicación adicional en **Azure DevOps Wiki**.
-- **Trazabilidad y auditoría** (artefactos con `graph.json`, `techdoc.md`, logs).
+- 🔍 **Análisis Estático**: Detección de controladores, endpoints, servicios, DTOs y módulos.
+- 🤖 **IA Multi-Provider**: Generación de descripciones semánticas usando Azure OpenAI o GitHub Copilot.
+- 📊 **Diagramas Automáticos**: Creación de diagramas de secuencia Mermaid basados en el flujo de código.
+- 🕐 **Git Integration**: Inclusión de historial de cambios y trazabilidad de autores.
+- 🏗️ **Multi-Stack**: Soporte para .NET (ASP.NET Core) y Node.js (NestJS/Express).
 
 ---
 
-## 2. Decisiones Estratégicas
+## 🏗️ Arquitectura (Hexagonal)
 
-- **Herramienta centralizada**: CLI .NET empaquetada como **dotnet tool** para evitar copiar scripts a cada repo.
-- **Repositorio por lenguaje**: Soporte inicial **.NET** y **Node (Nest/Express)**.
-- **Infraestructura mínima**: Se ejecuta **dentro del job de pipeline** (sin Functions/containers).
-- **Control de versiones** del tool vía **Azure Artifacts**.
-- **Publicación sin PR**: commit directo a la rama del pipeline (alineado a tu preferencia).
-- **Seguridad**: uso de `System.AccessToken` y permisos mínimos.
+El proyecto sigue los principios de **Clean Code** y **SOLID**, separando estrictamente la lógica de negocio de la infraestructura.
+
+```mermaid
+graph TD
+    subgraph "Capas del Agente"
+        CLI[Cli/Commands] --> Application[Core/UseCases]
+        Application --> Domain[Core/Models/Abstractions]
+        Infrastructure[Infrastructure/...] -.-> Domain
+    end
+
+    subgraph "Adaptadores de Infraestructura"
+        Infrastructure --> Scanner[.NET / Node Scanners]
+        Infrastructure --> AI[Azure OpenAI / Copilot]
+        Infrastructure --> Render[Scriban Templates]
+        Infrastructure --> Git[GitHistoryReader]
+    end
+```
+
+---
+
+## 🛠️ Configuración y Desarrollo
+
+### Recomendado: DevContainers
+
+Para un entorno listo para usar sin instalar dependencias locales:
+
+1. Asegúrate de tener **Docker** y la extensión **Dev Containers** en VS Code.
+2. Abre el proyecto y selecciona **"Reopen in Container"**.
+   - *Incluye SDK 10, Git y extensiones recomendadas.*
+
+### Docker (Producción / Ejecución)
+
+Si deseas construir y ejecutar el agente de forma aislada:
+
+**Build:**
+
+```bash
+docker build -t docgen-agent .
+```
+
+**Run (Escanear proyecto externo):**
+
+```bash
+docker run --rm \
+  -v /ruta/al/proyecto:/src \
+  -e AZURE_OPENAI_KEY="tu_key" \
+  docgen-agent scan --solution "/src" --out "/src/docs/graph.json"
+```
 
 ---
 
-## 3. Arquitectura (Hexagonal)
+## 💻 Uso del CLI
 
-**Capas (puertos/adaptadores):**
+El agente expone comandos específicos para cada etapa del proceso:
 
-- **Core (Dominio/Aplicación)**
-  - **Puertos**:
-    - `ISourceCodeScanner` (por lenguaje)
-    - `IRenderer` (plantillas)
-    - `IPublisher` (no usado en Fase 1 — pipeline publica en repo; Wiki en Fase 2)
-  - **Modelos**:
-    - `CodeGraph`, `Component`, `Endpoint`
-- **Infraestructura (Adaptadores)**
-  - **Scanners**:
-    - `.NET`: heurística con atributos `[ApiController]`, `[Route]`, `[Http*]` (Roslyn en fases posteriores)
-    - **Node**: NestJS (`@Controller`, `@Get|@Post|...`) y Express (`router.method(...)`)
-  - **Renderer**:
-    - `Scriban` (plantillas `*.sbn`)
-  - **Git**:
-    - utilitario para `git log -n 10` (historial)
-- **CLI (Orquestación)**
-  - `docgen scan` → genera `graph.json`
-  - `docgen render` → genera `techdoc.md`
+| Comando | Acción |
+| :--- | :--- |
+| `docgen scan` | Analiza el código y genera un `graph.json` con la estructura detectada. |
+| `docgen render` | Toma el grafo y plantillas para generar el `techdoc.md`. |
+| `docgen publish` | (Fase 2+) Publica la documentación en Azure DevOps Wiki. |
 
-**Flujo de alto nivel:**
+### Variables de Entorno (Secrets)
 
-1. **Pipeline** instala tool →
-2. `docgen scan` (detecta stack + construye grafo) →
-3. `docgen render` (plantillas + reglas) →
-4. **Commit** de `docs/techdoc.md` (sin PR) →
-5. **Artefactos** (`graph.json`, `techdoc.md`, logs).
-6. _(Fase 2)_ `docgen publish` a Wiki.
+Crea un archivo `.env` o configúralas en tu pipeline:
+
+- `AZURE_OPENAI_KEY`: Acceso al servicio de IA.
+- `AZURE_OPENAI_ENDPOINT`: Endpoint de tu instancia de Azure.
+- `SYSTEM_ACCESSTOKEN`: Token para integración con Azure DevOps.
 
 ---
-## 4. Estructura del Repositorio del Agente
 
-docgen-agent/
-├─ README.md
-├─ global.json
-├─ Directory.Build.props
-├─ azure-pipelines-docgen-agent.yml # build & publish del tool al feed
-├─ templates/
-│ ├─ main.sbn
-│ └─ sequence.sbn
-├─ rules/
-│ ├─ formatting.md
-│ └─ taxonomy.md
-└─ src/
-├─ DocGen.Core/
-│ ├─ Abstractions/
-│ │ ├─ ISourceCodeScanner.cs
-│ │ ├─ IRenderer.cs
-│ │ └─ IPublisher.cs
-│ └─ Models/
-│ ├─ CodeGraph.cs
-│ ├─ Component.cs
-│ └─ Endpoint.cs
-├─ DocGen.Infrastructure/
-│ ├─ Scanners/
-│ │ ├─ DotNetScanner.cs
-│ │ └─ NodeScanner.cs
-│ ├─ Render/
-│ │ └─ ScribanRenderer.cs
-│ └─ Git/
-│ └─ GitHistoryReader.cs
-└─ DocGen.Cli/
-├─ DocGen.Cli.csproj # PackAsTool=true, ToolCommandName=docgen
-├─ Program.cs
-└─ Commands/
-├─ ScanCommand.cs
-└─ RenderCommand.cs
+## 📁 Estructura del Proyecto
 
-**Convenciones:**
-
-- **PackageId (dotnet tool):** `AzureDevOps.DocGen.Cli`
-- **Feed (Azure Artifacts):** `AzureDevOps`
-- **Comando:** `docgen`
+```text
+docgen-agent-cli/
+├── Cli/            # Orquestación y comandos (System.CommandLine)
+├── Core/           # Dominio y Abstracciones (Lógica pura)
+├── Infrastructure/ # Implementaciones concretas (IO, Scanners, AI, Git)
+├── Templates/      # Plantillas Scriban (*.sbn)
+├── Rules/          # Prompts y reglas de taxonomía
+├── DocGen-Agent.sln
+└── Dockerfile      # Configuración de containerización
+```
 
 ---
+
+## 📜 Estándares de Codificación
+
+1. **Hexagonal Architecture**: Ninguna clase del `Core` debe depender de la `Infrastructure`.
+2. **SOLID**: Preferir interfaces y Dependency Injection.
+3. **No 'any'**: Tipado estricto en todos los niveles.
+4. **Unit Testing**: La lógica compleja debe ser testeable e inyectable.
+
+---
+
+**Autor:** Ruben Dario Carrillo
