@@ -1,0 +1,47 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  majorMinorVersion: '1.0'
+  semanticVersion: '$(majorMinorVersion).$(Build.BuildId)'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK 10.x'
+  inputs:
+    packageType: 'sdk'
+    version: '10.x'
+
+- script: |
+    dotnet --info
+    dotnet restore ./DocGen-Agent.csproj
+    mkdir -p $(Build.ArtifactStagingDirectory)/nupkgs
+    dotnet pack ./DocGen-Agent.csproj -c Release -p:PackageVersion=$(semanticVersion) -o $(Build.ArtifactStagingDirectory)/nupkgs
+  displayName: 'Build & Pack dotnet tool'
+
+- task: NuGetAuthenticate@1
+  displayName: 'Authenticate Azure Artifacts'
+
+- script: |
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/nupkgs/*.nupkg" \
+      --source "https://pkgs.dev.azure.com/davidldu/api-docs-generator/_packaging/DocGen-Agent/nuget/v3/index.json" \
+      --api-key VSTS \
+      --skip-duplicate
+  displayName: 'Push packages to Azure Artifacts'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/nupkgs'
+    ArtifactName: 'nupkgs'
+    publishLocation: 'Container'

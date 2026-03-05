@@ -1,0 +1,6 @@
+sequenceDiagram
+    autonumber
+    {{ diagram_content }}
+{{ if footer_note }}
+    Note over Usuario, DocGen: {{ footer_note }}
+{{ end }}

@@ -1,0 +1,32 @@
+{
+  "profiles": {
+    "DocGen-Agent (Scan)": {
+      "commandName": "Project",
+      "commandLineArgs": "scan --solution \".\" --out \"D:/Developer/Azure DevOps/appointment-management-system/docgen/graph.json\"",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "DocGen-Agent (Render)": {
+      "commandName": "Project",
+      "commandLineArgs": "render --graph \"D:/Developer/Azure DevOps/appointment-management-system/docgen/graph.json\" --templates \".docgen-templates\" --rules \".docgen-rules\" --project-name \"appointment-management-system\" --agent-type \"gemini\" --ai-endpoint \"https://generativelanguage.googleapis.com\" --agent-key \"AIzaSyBXQ9w9Y_tXLTfGSocmEGehw3TJE7gG8Bw\" --out \"./bin/Debug/net9.0/docgen/techdoc.md\"",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "DocGen-Agent (Verify)": {
+      "commandName": "Project",
+      "commandLineArgs": "verify --graph \"D:/Developer/Azure DevOps/appointment-management-system/docgen/graph.json\"",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "DocGen-Agent (Publish)": {
+      "commandName": "Project",
+      "commandLineArgs": "publish --input \"D:/Developer/Azure DevOps/appointment-management-system/docgen/graph.json\" --target \"./docs/techdoc.md\"",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

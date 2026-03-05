@@ -1,0 +1,12 @@
+# {{ project_name }} — Documentación Técnica
+
+{{ executive_summary }}
+
+## Diagramas de Secuencia
+{{ sequence_diagrams }}
+
+## Historial de Cambios
+{{ change_history }}
+
+---
+*Generado por DocGen-Agent AI | Fecha: {{ generated_at }}*
