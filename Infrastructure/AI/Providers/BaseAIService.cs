@@ -1,5 +1,5 @@
-using DocGen_Agent.Core.Abstractions;
-using DocGen_Agent.Core.Models;
+using DocGen_Agent.Application.Ports;
+using DocGen_Agent.Domain.Entities;
 using DocGen_Agent.Infrastructure.AI.Prompts;
 using OpenAI.Chat;
 using System.Text.Json;

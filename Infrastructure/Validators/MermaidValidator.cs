@@ -1,4 +1,4 @@
-using DocGen_Agent.Core.Abstractions;
+using DocGen_Agent.Application.Ports;
 using System.Text.RegularExpressions;
 
 namespace DocGen_Agent.Infrastructure.Validators;

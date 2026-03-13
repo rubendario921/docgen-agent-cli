@@ -1,11 +1,11 @@
+using DocGen_Agent.Application.UseCases.PublishApplication;
 using System.CommandLine;
-using DocGen_Agent.Infrastructure.Publishers;
 
 namespace DocGen_Agent.Cli.Commands;
 
 public static class PublishCommand
 {
-    public static Command Build()
+    public static Command Build(IPublishUseCase publishUseCase)
     {
         var cmd = new Command("publish", "Publica la documentación en Azure DevOps Wiki");
 
@@ -28,18 +28,10 @@ public static class PublishCommand
             try
             {
                 var accessToken = tkn ?? Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
-                if (string.IsNullOrEmpty(accessToken))
-                {
-                    throw new Exception("[error] No se encontró Token. Use --token o SYSTEM_ACCESSTOKEN");
-                }
-
+                
                 Console.WriteLine($"[docgen] Publicando {sourcePath} en Wiki {id}...");
 
-                using var httpClient = new HttpClient();
-                var publisher = new AzureDevOpsWikiPublisher(httpClient);
-                var options = new WikiPublishOptions(url, proj, id, accessToken);
-
-                await publisher.PublishAsync(sourcePath, path, options);
+                await publishUseCase.ExecuteAsync(sourcePath, path, url, proj, id, accessToken!);
 
                 Console.WriteLine("[docgen] Publicación exitosa.");
             }

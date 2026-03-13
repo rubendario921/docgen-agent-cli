@@ -1,4 +1,4 @@
-using DocGen_Agent.Core.Abstractions;
+using DocGen_Agent.Application.Ports;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -69,5 +69,3 @@ public sealed class AzureDevOpsWikiPublisher : IPublisher
     private sealed record WikiInfo(string id, string type, List<WikiVersion>? versions);
     private sealed record WikiVersion(string version);
 }
-
-public record WikiPublishOptions(string OrgUrl, string Project, string WikiId, string Token, string? Branch = null, string? Comment = null);

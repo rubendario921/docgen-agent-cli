@@ -1,4 +1,4 @@
-using DocGen_Agent.Core.Constants;
+using DocGen_Agent.Domain.Constants;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;

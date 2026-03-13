@@ -1,5 +1,5 @@
-﻿using DocGen_Agent.Core.Abstractions;
-using DocGen_Agent.Core.Models;
+using DocGen_Agent.Application.Ports;
+using DocGen_Agent.Domain.Entities;
 using System.Text.RegularExpressions;
 
 namespace DocGen_Agent.Infrastructure.Scanners;

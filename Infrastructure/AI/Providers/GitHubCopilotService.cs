@@ -1,4 +1,4 @@
-using DocGen_Agent.Core.Constants;
+using DocGen_Agent.Domain.Constants;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
@@ -6,7 +6,7 @@ using System.ClientModel;
 namespace DocGen_Agent.Infrastructure.AI.Providers;
 
 /// <summary>
-/// Integracion con GitHub Copilot utilizando su endpoint compatible con OpenAI y adaptando a la interfaz común de ChatClient para mantener compatibilidad con el resto de la aplicación.
+/// Integracion con GitHub Copilot utilizando su endpoint compatible con OpenAI y adaptando a la interfaz comÃºn de ChatClient para mantener compatibilidad con el resto de la aplicaciÃ³n.
 /// </summary>
 public sealed class GitHubCopilotService : BaseAIService
 {

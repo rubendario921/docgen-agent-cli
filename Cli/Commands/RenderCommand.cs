@@ -1,8 +1,6 @@
-﻿using DocGen_Agent.Core.Abstractions;
-using DocGen_Agent.Core.Models;
-using DocGen_Agent.Infrastructure.AI.Providers;
-using DocGen_Agent.Infrastructure.Git;
-using DocGen_Agent.Infrastructure.Render;
+using DocGen_Agent.Application.Ports;
+using DocGen_Agent.Application.UseCases.RenderApplication;
+using DocGen_Agent.Domain.Entities;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Text.Json;
@@ -11,7 +9,7 @@ namespace DocGen_Agent.Cli.Commands;
 
 public static class RenderCommand
 {
-    public static Command Build()
+    public static Command Build(IRenderUseCase renderUseCase)
     {
         var cmd = new Command("render", "Renderiza Markdown desde un grafo de código");
         var graph = new Option<string>("--graph") { IsRequired = true };
@@ -62,25 +60,7 @@ public static class RenderCommand
                 var codeGraph = JsonSerializer.Deserialize<CodeGraph>(json)
                                 ?? throw new InvalidOperationException("El archivo de grafo no es un JSON válido o está vacío.");
 
-                var tplMainContent = ReadTemplateContent(tplDir, "main.sbn");
-                var tplSeqContent = ReadTemplateContent(tplDir, "sequence.sbn", "```mermaid\nsequenceDiagram\nparticipant Client\nparticipant API\nClient->>API: Request\nAPI-->>Client: Response\n```");
-
-                IAIService aiService;
-
-                aiService = agentType.ToLower() switch
-                {
-                    "azure" => new AzureOpenAIService(endpoint, key, model),
-                    "copilot" => new GitHubCopilotService(endpoint, key, model),
-                    "gemini" => new GeminiService(endpoint, key, model),
-                    _ => throw new ArgumentException("Tipo de agente no válido"),
-                };
-
-                Console.WriteLine($"[docgen] Iniciando enriquecimiento con agente {agentType}...");
-                var viewModel = await CreateViewModelAsync(codeGraph, projectName, tplSeqContent, aiService);
-
-                Console.WriteLine($"[docgen] Generando diagramas de secuencia...");
-                var renderer = new ScribanRenderer();
-                var md = renderer.Render(tplMainContent, viewModel);
+                var md = await renderUseCase.ExecuteAsync(codeGraph, projectName, tplDir, rulesDir, agentType, endpoint, key, model);
 
                 Console.WriteLine($"[docgen] Renderizado completo. Generando Markdown...");
                 var outDir = Path.GetDirectoryName(outPath);
@@ -92,79 +72,10 @@ public static class RenderCommand
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[critical] Fallo en la renderización: {ex.Message}");
+                Console.Error.WriteLine($"[error] Fallo en la renderización: {ex.Message}");
             }
         });
 
         return cmd;
-    }
-
-    private static async Task<object> CreateViewModelAsync(CodeGraph codeGraph, string projectName, string tplSeqContent, IAIService? aiService)
-    {
-        var executiveSummary = "_(Generado automáticamente; se enriquecerá en Fase 3 con IA)_";
-        var sequenceDiagrams = tplSeqContent;
-
-        if (aiService != null)
-        {
-            try
-            {
-                executiveSummary = await aiService.EnrichSectionAsync("ExecutiveSummary", codeGraph, projectName);
-
-                var sb = new System.Text.StringBuilder();
-                var endpointsToProcess = codeGraph.Endpoints.Take(10).ToList();
-                foreach (var ep in endpointsToProcess)
-                {
-                    var diagram = await aiService.GenerateSequenceDiagramAsync(ep, $"Project: {projectName}, Framework: {codeGraph.Framework}");
-                    sb.AppendLine($"### Flujo: {ep.Method} {ep.Path}");
-                    sb.AppendLine(":::mermaid");
-                    sb.AppendLine(diagram);
-                    sb.AppendLine(":::");
-                    sb.AppendLine();
-                }
-                if (sb.Length > 0) sequenceDiagrams = sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[warn] Error en enriquecimiento IA: {ex.Message}. Usando fallbacks.");
-            }
-        }
-
-        return new
-        {
-            project_name = projectName,
-            executive_summary = executiveSummary,
-            sequence_diagrams = sequenceDiagrams,
-            change_history = GitHistoryReader.ReadLastChanges(10),
-            commit_sha = Environment.GetEnvironmentVariable("BUILD_SOURCEVERSION") ?? "N/A",
-            generated_at = DateTime.UtcNow.ToString("u")
-        };
-    }
-
-    private static string ReadTemplateContent(string tplDir, string fileName, string? fallback = null)
-    {
-        var path = Path.Combine(tplDir, fileName);
-        if (File.Exists(path)) return File.ReadAllText(path);
-
-        // Fallback a carpeta lowercase (compatibilidad Linux)
-        var pathLower = Path.Combine(tplDir.ToLowerInvariant(), fileName);
-        if (File.Exists(pathLower)) return File.ReadAllText(pathLower);
-
-        // Fallback a carpeta local 'Templates'
-        var localPath = Path.Combine("Templates", fileName);
-        if (File.Exists(localPath)) return File.ReadAllText(localPath);
-
-        // Fallback a Embedded Resource
-        var assembly = typeof(RenderCommand).Assembly;
-        var resourceName = $"DocGen_Agent.Templates.{fileName}";
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream != null)
-        {
-            using var reader = new StreamReader(stream);
-            return reader.ReadToEnd();
-        }
-
-        if (fallback != null) return fallback;
-
-        throw new FileNotFoundException($"No se encontró plantilla '{fileName}' ni en disco ni en recursos embebidos.", path);
     }
 }

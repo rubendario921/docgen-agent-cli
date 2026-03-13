@@ -1,12 +1,13 @@
 using System.CommandLine;
-using DocGen_Agent.Core.Abstractions;
+using DocGen_Agent.Application.Ports;
+using DocGen_Agent.Application.UseCases.VerifyApplication;
 using DocGen_Agent.Infrastructure.Validators;
 
 namespace DocGen_Agent.Cli.Commands;
 
 public static class VerifyCommand
 {
-    public static Command Build()
+    public static Command Build(IVerifyUseCase verifyUseCase)
     {
         var cmd = new Command("verify", "Valida la calidad del Markdown generado (Mermaid, Links, etc.)");
 
@@ -18,37 +19,8 @@ public static class VerifyCommand
         {
             try 
             {
-                if (!File.Exists(filePath))
-                {
-                    Console.Error.WriteLine($"[error] No se encontró el archivo: {filePath}");
-                    return;
-                }
-
-                var content = await File.ReadAllTextAsync(filePath);
-                var validators = new List<IValidator>
-                {
-                    new MermaidValidator(),
-                    new MarkdownLinkValidator()
-                };
-
-                bool allValid = true;
-                foreach (var v in validators)
-                {
-                    var (isValid, errors) = await v.ValidateAsync(content);
-                    if (!isValid)
-                    {
-                        allValid = false;
-                        foreach (var err in errors)
-                        {
-                            Console.WriteLine($"[warn] {v.GetType().Name}: {err}");
-                        }
-                    }
-                }
-
-                if (allValid)
-                    Console.WriteLine("[docgen] Verificación exitosa. El documento cumple los estándares.");
-                else
-                    Console.WriteLine("[docgen] Verificación completada con advertencias.");
+                await verifyUseCase.ExecuteAsync(filePath);
+                Console.WriteLine("[docgen] Verificación exitosa. El documento cumple los estándares.");
             }
             catch (Exception ex)
             {

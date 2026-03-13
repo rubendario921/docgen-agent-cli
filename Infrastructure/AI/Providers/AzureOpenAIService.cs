@@ -1,12 +1,12 @@
 using Azure;
 using Azure.AI.OpenAI;
-using DocGen_Agent.Core.Constants;
+using DocGen_Agent.Domain.Constants;
 using OpenAI.Chat;
 
 namespace DocGen_Agent.Infrastructure.AI.Providers;
 
 /// <summary>
-/// Integracion con Azure OpenAI utilizando Azure.AI.OpenAI SDK y adaptando a la interfaz común de ChatClient para mantener compatibilidad con el resto de la aplicación.
+/// Integracion con Azure OpenAI utilizando Azure.AI.OpenAI SDK y adaptando a la interfaz comÃºn de ChatClient para mantener compatibilidad con el resto de la aplicaciÃ³n.
 /// </summary>
 public sealed class AzureOpenAIService : BaseAIService
 {

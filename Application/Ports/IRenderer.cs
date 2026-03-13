@@ -1,4 +1,4 @@
-﻿namespace DocGen_Agent.Core.Abstractions;
+namespace DocGen_Agent.Application.Ports;
 
 public interface IRenderer
 {

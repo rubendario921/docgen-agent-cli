@@ -1,4 +1,4 @@
-namespace DocGen_Agent.Core.Constants;
+namespace DocGen_Agent.Domain.Constants;
 
 public static class AIConstants
 {

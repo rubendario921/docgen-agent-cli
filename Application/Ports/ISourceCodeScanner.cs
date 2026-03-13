@@ -1,6 +1,6 @@
-﻿using DocGen_Agent.Core.Models;
+using DocGen_Agent.Domain.Entities;
 
-namespace DocGen_Agent.Core.Abstractions;
+namespace DocGen_Agent.Application.Ports;
 
 public interface ISourceCodeScanner
 {

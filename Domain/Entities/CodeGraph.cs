@@ -1,4 +1,4 @@
-﻿namespace DocGen_Agent.Core.Models;
+namespace DocGen_Agent.Domain.Entities;
 
 public sealed record CodeGraph(
     string Language,
